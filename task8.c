@@ -49,20 +49,32 @@ void saveData(Character *player) {
         printf("ファイルを開けませんでした。\n");
         return;
     }
-    fprintf(file, "名前: %s\n", player->name);
-    fprintf(file, "レベル: %d\n", player->level);
-    fprintf(file, "HP: %d/%d\n", player->hp, player->max_hp);
-    fprintf(file, "MP: %d/%d\n", player->mp, player->max_mp);
-    fprintf(file, "経験値: %d\n", player->exp);
+    fprintf(file, "%s\n", player->name);
+    fprintf(file, "%d\n", player->hp);
+    fprintf(file, "%d\n", player->max_hp);
+    fprintf(file, "%d\n", player->mp);
+    fprintf(file, "%d\n", player->max_mp);
+    fprintf(file, "%d\n", player->attack);
+    fprintf(file, "%d\n", player->exp);
+    fprintf(file, "%d\n", player->level);
     fclose(file);
     printf("データが保存されました。\n");
 }
 
+int getExpThreshold(int level) {
+    return 100 + (level - 1) * 20;  // レベルが上がるごとに必要経験値が20増加
+}
+
 // 戦闘シーンの表示
 void displayBattle(Character *player, Character *enemy) {
+    int expToNextLevel = getExpThreshold(player->level) - player->exp;
+
     printf("\033[2J\033[H"); // 画面クリア
-    printf("\033[32m【%s】\033[0m\nHP: %d/%d  MP: %d/%d\n", player->name, player->hp, player->max_hp, player->mp, player->max_mp);
-    printf("\033[31m【%s】\033[0m\nHP: %d\n", enemy->name, enemy->hp);
+    printf("\033[32m【%s Lv.%d】\033[0m\n", player->name, player->level);
+    printf("HP: %d/%d  MP: %d/%d  EXP: %d/%d\n", player->hp, player->max_hp, player->mp, player->max_mp, player->exp, expToNextLevel);
+
+    printf("\033[31m【%s】\033[0m\n", enemy->name);
+    printf("HP: %d\n", enemy->hp);
 }
 
 // 攻撃処理
@@ -105,15 +117,13 @@ void levelUp(Character *player) {
 
 // 敵のステータスを設定
 void initEnemy(Character *enemy, int battleCount) {
-    sprintf(enemy->name, "敵スライム Lv.%d", battleCount);
+    sprintf(enemy->name, "スライム Lv.%d", battleCount);
     enemy->max_hp = 50 + (battleCount * 5); // 戦闘回数に応じてHP増加
     enemy->hp = enemy->max_hp;
     enemy->attack = 13 + (battleCount * 2);  // 戦闘回数に応じて攻撃力増加
 }
 
-int getExpThreshold(int level) {
-    return 100 + (level - 1) * 20;  // レベルが上がるごとに必要経験値が20増加
-}
+
 
 // 敵の強さに応じた経験値を取得
 int calculateExp(Character *enemy) {
